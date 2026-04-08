@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroSat Intelligence Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060d1f;--bg2:#0d1b35;--bg3:#162447;--card:#0d1b35;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.14);
+  --text:#f0f6ff;--text2:#c8d8f0;--text3:#7a94bb;
+  --green:#00e676;--green2:#00c853;--green-bg:rgba(0,230,118,0.08);--green-border:rgba(0,200,83,0.4);
+  --blue:#29b6f6;--blue2:#0288d1;--blue-bg:rgba(41,182,246,0.08);--blue-border:rgba(2,136,209,0.4);
+  --amber:#ffca28;--amber2:#ff8f00;--amber-bg:rgba(255,202,40,0.08);--amber-border:rgba(255,143,0,0.4);
+  --red:#ff5252;--red2:#d50000;--red-bg:rgba(255,82,82,0.08);--red-border:rgba(213,0,0,0.4);
+  --purple:#ce93d8;--purple2:#7b1fa2;--purple-bg:rgba(206,147,216,0.08);--purple-border:rgba(123,31,162,0.4);
+  --teal:#26c6da;--teal-bg:rgba(38,198,218,0.08);--teal-border:rgba(38,198,218,0.4);
+  --r:10px;--rl:16px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;min-height:100vh}
+
+/* ─── TOPBAR ─────────────────────────────────── */
+.topbar{
+  background:linear-gradient(135deg,#060d1f 0%,#0a1628 40%,#06142b 100%);
+  border-bottom:1px solid var(--border2);
+  padding:18px 28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+}
+.pulse{width:13px;height:13px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 0 0 rgba(0,230,118,.7);animation:ping 2s infinite;flex-shrink:0}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(0,230,118,.7)}70%{box-shadow:0 0 0 10px rgba(0,230,118,0)}100%{box-shadow:0 0 0 0 rgba(0,230,118,0)}}
+.db-title{font-size:21px;font-weight:800;letter-spacing:-.4px;background:linear-gradient(90deg,#fff 0%,#29b6f6 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.db-sub{font-size:12.5px;color:var(--text3);margin-top:2px}
+.topbar-r{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.flt{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 13px}
+.flt label{font-size:11px;color:var(--text3);white-space:nowrap}
+.flt select{background:transparent;border:none;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;outline:none}
+.flt select option{background:#162447}
+.live{display:flex;align-items:center;gap:7px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:20px;padding:6px 15px;font-size:12px;font-weight:700;color:var(--green)}
+.live-d{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ─── TABS ────────────────────────────────────── */
+.tabs{display:flex;gap:3px;padding:16px 28px 0;background:var(--bg);border-bottom:1px solid var(--border2);overflow-x:auto}
+.tab{background:none;border:none;border-bottom:3px solid transparent;padding:11px 22px 15px;font-size:14px;font-weight:700;font-family:inherit;color:var(--text3);cursor:pointer;white-space:nowrap;transition:all .2s;border-radius:10px 10px 0 0}
+.tab:hover{color:var(--text);background:var(--bg2)}
+.tab.on{color:var(--blue);border-bottom-color:var(--blue);background:var(--bg2)}
+
+/* ─── PAGES ───────────────────────────────────── */
+.page{display:none;padding:26px 28px;max-width:1440px;margin:0 auto}
+.page.on{display:block}
+
+/* ─── SECTION HEADER ──────────────────────────── */
+.shd{font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+.shd::after{content:'';flex:1;height:1px;background:var(--border2)}
+
+/* ─── KPI ROW ─────────────────────────────────── */
+.krow{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:14px;margin-bottom:24px}
+.kc{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:22px 20px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:default}
+.kc:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.6)}
+.kc-top{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--rl) var(--rl) 0 0}
+.kc-icon{font-size:32px;margin-bottom:10px;display:block}
+.kc-lbl{font-size:10.5px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px}
+.kc-val{font-size:36px;font-weight:900;line-height:1;margin-bottom:7px}
+.kc-sub{font-size:12px;color:var(--text3);line-height:1.4}
+.kc-def{font-size:12px;color:var(--text3);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);line-height:1.6;font-style:italic}
+
+/* ─── GRIDS ────────────────────────────────────── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:20px}
+@media(max-width:960px){.g2,.g3{grid-template-columns:1fr}}
+
+/* ─── PANEL ─────────────────────────────────────  */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:22px;margin-bottom:20px;transition:box-shadow .2s}
+.panel:hover{box-shadow:0 6px 28px rgba(0,0,0,.45)}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:10px}
+.pt{font-size:16px;font-weight:800;color:var(--text)}
+.ps{font-size:12.5px;color:var(--text3);margin-top:3px;line-height:1.5}
+
+/* ─── DEFINITION BOX ──────────────────────────── */
+.def{background:linear-gradient(135deg,rgba(41,182,246,.06),rgba(41,182,246,.02));
+  border-left:3px solid var(--blue2);border-radius:0 var(--r) var(--r) 0;
+  padding:12px 16px;margin:12px 0;font-size:12.5px;color:var(--text3);line-height:1.7}
+.def strong{color:var(--blue);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:3px}
+
+/* ─── SOURCE TAG ─────────────────────────────── */
+.src{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--text3);background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:3px 9px;margin:2px}
+.src-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+
+/* ─── BADGES ────────────────────────────────────  */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;white-space:nowrap}
+.bg{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.bb{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.ba{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.br{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.bp{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
+
+/* ─── LEGEND ─────────────────────────────────── */
+.leg{display:flex;flex-wrap:wrap;gap:14px;margin:10px 0}
+.li{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text3)}
+.ld{width:13px;height:13px;border-radius:3px;flex-shrink:0}
+
+/* ─── BAR ROWS ───────────────────────────────── */
+.rbar{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.rbar:last-child{border-bottom:none}
+.rbn{font-size:13.5px;font-weight:700;color:var(--text);width:82px;flex-shrink:0}
+.rbt{flex:1;height:10px;background:var(--bg3);border-radius:5px;overflow:hidden}
+.rbf{height:100%;border-radius:5px;transition:width .9s ease}
+.rbv{font-size:14px;font-weight:800;width:46px;text-align:right;flex-shrink:0}
+.rbtag{font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;width:80px;text-align:center;flex-shrink:0}
+
+/* ─── TABLE ──────────────────────────────────── */
+.tw{overflow-x:auto;border-radius:var(--r)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:10.5px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:11px 13px;border-bottom:1px solid var(--border2);text-align:left;background:var(--bg);white-space:nowrap}
+td{padding:13px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.03)}
+
+/* ─── CALLOUT BOXES ──────────────────────────── */
+.info{background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--r);padding:15px 18px;margin-top:16px}
+.info-lbl{font-size:10px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.12em;margin-bottom:5px}
+.info-txt{font-size:13.5px;color:var(--text2);line-height:1.75}
+.alert{background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r);padding:15px 18px;margin-top:16px}
+.alert-lbl{font-size:10px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.12em;margin-bottom:5px}
+.alert-txt{font-size:13.5px;color:var(--text2);line-height:1.75}
+
+/* ─── MONO REPORT ────────────────────────────── */
+.mono{font-family:'SFMono-Regular',Consolas,monospace;font-size:13px;line-height:2.1;
+  color:var(--text3);background:var(--bg);border-radius:var(--r);padding:18px 22px;
+  border:1px solid var(--border2);margin-top:14px}
+.mono .red{color:var(--red);font-weight:800}
+.mono .grn{color:var(--green);font-weight:800}
+.mono .amb{color:var(--amber);font-weight:800}
+
+/* ─── CHIPS ──────────────────────────────────── */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.sep{font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;
+  padding:8px 0 6px;border-bottom:1px solid var(--border2);margin:12px 0 10px}
+
+/* ─── LATENCY TIMELINE ───────────────────────── */
+.latgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:13px;margin-top:18px}
+.latcard{background:var(--bg);border:1px solid var(--border2);border-radius:var(--r);padding:18px;text-align:center}
+.latcard.done{border-color:var(--green-border);background:var(--green-bg)}
+.lattime{font-size:28px;font-weight:900;color:var(--blue);margin:7px 0 6px}
+.latcard.done .lattime{color:var(--green)}
+
+/* ─── SCROLLBAR ──────────────────────────────── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <span class="pulse"></span>
+  <div>
+    <div class="db-title">🌾 AgroSat Intelligence Dashboard</div>
+    <div class="db-sub">Satellite-powered crop analytics · Punjab wheat belt · Rabi season 2022–23 · 22 districts · Built by Arjun Sirohi</div>
+  </div>
+  <div class="topbar-r">
+    <div class="flt"><label>Season</label><select><option>Rabi 2022–23</option><option>Rabi 2021–22</option><option>Rabi 2020–21</option></select></div>
+    <div class="flt"><label>District</label><select><option>All Districts</option><option>Ludhiana</option><option>Bathinda</option><option>Amritsar</option><option>Patiala</option><option>Faridkot</option><option>Mansa</option></select></div>
+    <div class="flt"><label>Crop</label><select><option>Wheat</option><option>Onion</option><option>Tomato</option></select></div>
+    <div class="live"><span class="live-d"></span>Live</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab on" onclick="go('overview',this)">📊 Overview</button>
+  <button class="tab" onclick="go('yield',this)">🌾 Yield Model</button>
+  <button class="tab" onclick="go('stress',this)">🛰️ Stress Detection</button>
+  <button class="tab" onclick="go('price',this)">💰 Price Forecast</button>
+  <button class="tab" onclick="go('credit',this)">🏦 Credit Risk</button>
+  <button class="tab" onclick="go('pipeline',this)">⚙️ Data Pipeline</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     OVERVIEW
+═══════════════════════════════════════════ -->
+<div id="pg-overview" class="page on">
+<div class="shd">Platform Summary — What AgroSat Intelligence Does</div>
+
+<div class="krow">
+  <div class="kc">
+    <div class="kc-top" style="background:linear-gradient(90deg,#00e676,#00c853)"></div>
+    <span class="kc-icon">🎯</span>
+    <div class="kc-lbl">Yield Prediction Accuracy</div>
+    <div class="kc-val" style="color:var(--green)">8.2%</div>
+    <div class="kc-sub">error rate · industry benchmark ~10%</div>
+    <div class="kc-def">This is MAPE — Mean Absolute Percentage Error. Think of it like a weather forecast accuracy score. 8.2% error means if a farm is expected to produce 100 bags of wheat, our satellite model predicts between 92–108 bags. We beat the industry standard.</div>
+  </div>
+  <div class="kc">
+    <div class="kc-top" style="background:linear-gradient(90deg,#29b6f6,#0288d1)"></div>
+    <span class="kc-icon">📍</span>
+    <div class="kc-lbl">Districts Monitored</div>
+    <div class="kc-val" style="color:var(--blue)">22</div>
+    <div class="kc-sub">full Punjab wheat belt coverage</div>
+    <div class="kc-def">A "district" in Punjab is like a county — an administrative zone containing hundreds of villages and farms. We monitor all 22 wheat-growing districts via satellite, with zero physical field visits required.</div>
+  </div>
+  <div class="kc">
+    <div class="kc-top" style="background:linear-gradient(90deg,#ff5252,#d50000)"></div>
+    <span class="kc-icon">🚨</span>
+    <div class="kc-lbl">High-Risk Districts</div>
+    <div class="kc-val" style="color:var(--red)">3</div>
+    <div class="kc-sub">need urgent bank credit review</div>
+    <div class="kc-def">These 3 districts show satellite data indicating crops are in serious trouble this season. They contain thousands of active farm loans. Banks must reassess those loans before the April harvest or risk sudden defaults.</div>
+  </div>
+  <div class="kc">
+    <div class="kc-top" style="background:linear-gradient(90deg,#26c6da,#00acc1)"></div>
+    <span class="kc-icon">⏱️</span>
+    <div class="kc-lbl">Early Warning Lead Time</div>
+    <div class="kc-val" style="color:var(--teal)">6 Wks</div>
+    <div class="kc-sub">before damage is visible on the ground</div>
+    <div class="kc-def">By the time a bank inspector or farmer physically sees crop stress with their own eyes, our satellite system flagged it 6 weeks earlier — giving lenders enough time to act proactively instead of reacting to defaults.</div>
+  </div>
+  <div class="kc">
+    <div class="kc-top" style="background:linear-gradient(90deg,#ffca28,#ff8f00)"></div>
+    <span class="kc-icon">📈</span>
+    <div class="kc-lbl">Price Forecast Error</div>
+    <div class="kc-val" style="color:var(--amber)">9.1%</div>
+    <div class="kc-sub">wheat · 30-day ahead forecast</div>
+    <div class="kc-def">We predict wheat market prices 30 days in advance with 9.1% error. On a price of ₹2,200 per quintal (100 kg), that means our forecast is typically within ₹200. Useful for farmers timing when to sell their harvest.</div>
+  </div>
+  <div class="kc">
+    <div class="kc-top" style="background:linear-gradient(90deg,#ce93d8,#7b1fa2)"></div>
+    <span class="kc-icon">🛰️</span>
+    <div class="kc-lbl">Satellite Pixels Processed</div>
+    <div class="kc-val" style="color:var(--purple)">660M</div>
+    <div class="kc-sub">each covers a 10m × 10m field patch</div>
+    <div class="kc-def">660 million individual ground patches scanned — each the size of a small room. This is a complete census of every farm in Punjab, not a sample. Every field is individually measured from space.</div>
+  </div>
+</div>
+
+<div class="g2">
+  <div class="panel">
+    <div class="ph">
+      <div><div class="pt">Predicted vs Actual Harvest — All Districts</div>
+      <div class="ps">How closely our satellite AI matched real harvests · kg/ha = kilograms per hectare (1 hectare ≈ 2.5 football fields)</div></div>
+      <span class="badge bg">8.2% Error</span>
+    </div>
+    <div class="def"><strong>How to read this chart</strong>Each district has two bars. Green = what our model predicted before harvest. Blue = what farmers actually collected. The closer the two bars, the more accurate our model. Stressed districts like Bathinda show lower yields — and our model correctly predicted that weeks in advance.</div>
+    <div class="leg"><span class="li"><span class="ld" style="background:var(--green)"></span>Predicted (kg/ha)</span><span class="li"><span class="ld" style="background:var(--blue)"></span>Actual Harvest</span></div>
+    <div style="position:relative;width:100%;height:255px"><canvas id="ov_yield"></canvas></div>
+    <div class="src-row"><span class="src">📡 Source: Sentinel-2 NDVI</span><span class="src">📊 Model: XGBoost</span><span class="src">📂 Ground truth: FAOSTAT</span></div>
+  </div>
+  <div class="panel">
+    <div class="ph">
+      <div><div class="pt">Crop Health Ranking — Which Districts Are Struggling?</div>
+      <div class="ps">Satellite NDVI z-score · February grain-fill window (most critical month for wheat)</div></div>
+      <span class="badge br">⚠ Alerts Active</span>
+    </div>
+    <div class="def"><strong>What is a Z-Score?</strong>A z-score measures how far something deviates from its long-term average. 0 = perfectly normal. −2.0 = dangerously below normal (only occurs in 2.5% of seasons historically). Think of it like body temperature: 37°C is normal, 40°C is a fever, 42°C is critical.</div>
+    <div style="margin-top:14px">
+      <div class="rbar"><span class="rbn">Ludhiana</span><div class="rbt"><div class="rbf" style="width:5%;background:var(--green)"></div></div><span class="rbv" style="color:var(--green)">−0.2</span><span class="rbtag" style="background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)">✓ Normal</span></div>
+      <div class="rbar"><span class="rbn">Patiala</span><div class="rbt"><div class="rbf" style="width:8%;background:var(--green)"></div></div><span class="rbv" style="color:var(--green)">−0.3</span><span class="rbtag" style="background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)">✓ Normal</span></div>
+      <div class="rbar"><span class="rbn">Amritsar</span><div class="rbt"><div class="rbf" style="width:20%;background:var(--teal)"></div></div><span class="rbv" style="color:var(--teal)">−0.6</span><span class="rbtag" style="background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-border)">✓ Normal</span></div>
+      <div class="rbar"><span class="rbn">Mansa</span><div class="rbt"><div class="rbf" style="width:55%;background:var(--amber)"></div></div><span class="rbv" style="color:var(--amber)">−1.8</span><span class="rbtag" style="background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)">⚠ Watch</span></div>
+      <div class="rbar"><span class="rbn">Faridkot</span><div class="rbt"><div class="rbf" style="width:78%;background:#ff7043"></div></div><span class="rbv" style="color:#ff7043">−2.4</span><span class="rbtag" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)">🚨 Critical</span></div>
+      <div class="rbar"><span class="rbn">Bathinda</span><div class="rbt"><div class="rbf" style="width:95%;background:var(--red)"></div></div><span class="rbv" style="color:var(--red)">−3.1</span><span class="rbtag" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)">🚨 Critical</span></div>
+    </div>
+    <div class="alert"><div class="alert-lbl">⚠️ Bank Action Required Now</div><div class="alert-txt">Bathinda (z=−3.1) and Faridkot (z=−2.4) are in the Critical zone — crop health is 3× worse than historical norms. Agricultural lenders must reduce KCC loan limits and pre-position debt recovery <strong>before April harvest</strong> to avoid large-scale defaults.</div></div>
+    <div class="src-row"><span class="src">📡 Source: Sentinel-2 ESA</span><span class="src">📅 Window: Feb 2023</span><span class="src">📏 Threshold: z &lt; −2.0</span></div>
+  </div>
+</div>
+
+<div class="g3">
+  <div class="panel">
+    <div class="ph"><div><div class="pt">Prediction Accuracy by Use Case</div><div class="ps">MAPE % per module — lower = more accurate</div></div></div>
+    <div class="def"><strong>Why accuracy varies</strong>Wheat yield is predictable because satellite images directly show plant health. Perishable crops like tomato have prices that swing wildly due to supply shocks — any model struggles there.</div>
+    <div style="position:relative;width:100%;height:210px;margin-top:12px"><canvas id="ov_acc"></canvas></div>
+    <div class="src-row"><span class="src">📡 Sentinel-2</span><span class="src">🏪 AGMARKNET</span></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><div><div class="pt">What Drives Crop Yield? (AI Explainability)</div><div class="ps">SHAP analysis — which inputs matter most to the model</div></div></div>
+    <div class="def"><strong>What is SHAP?</strong>SHAP opens the AI "black box" and quantifies how much each input variable contributed to the prediction. It lets a bank manager say exactly <em>why</em> a district was flagged — not just that it was.</div>
+    <div style="position:relative;width:100%;height:210px;margin-top:12px"><canvas id="ov_shap"></canvas></div>
+    <div class="src-row"><span class="src">🧠 SHAP library</span><span class="src">🌾 XGBoost model</span></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><div><div class="pt">Real Business Impact for Lenders</div><div class="ps">What this platform delivers for agricultural banks</div></div></div>
+    <div style="margin-top:12px">
+      <div class="rbar"><span class="rbn" style="width:145px;font-size:12px">Loan defaults cut</span><div class="rbt"><div class="rbf" style="width:35%;background:var(--green)"></div></div><span class="rbv" style="color:var(--green);font-size:12.5px;width:50px">3–4%</span></div>
+      <div class="rbar"><span class="rbn" style="width:145px;font-size:12px">Field visits saved</span><div class="rbt"><div class="rbf" style="width:60%;background:var(--blue)"></div></div><span class="rbv" style="color:var(--blue);font-size:12.5px;width:50px">60%</span></div>
+      <div class="rbar"><span class="rbn" style="width:145px;font-size:12px">Loan approval speed</span><div class="rbt"><div class="rbf" style="width:97%;background:var(--green)"></div></div><span class="rbv" style="color:var(--green);font-size:12.5px;width:50px">97%↑</span></div>
+      <div class="rbar"><span class="rbn" style="width:145px;font-size:12px">Alert lead time</span><div class="rbt"><div class="rbf" style="width:100%;background:var(--purple)"></div></div><span class="rbv" style="color:var(--purple);font-size:12.5px;width:50px">6 wks</span></div>
+    </div>
+    <div class="info"><div class="info-lbl">💡 Bottom Line</div><div class="info-txt">Loan approvals that took <strong>3 weeks</strong> now take <strong>8 hours</strong>. One satellite pass replaces a ₹400 physical field inspection — at unlimited scale.</div></div>
+  </div>
+</div>
+</div><!-- /overview -->
+
+
+<!-- ═══════════════════════════════════════════
+     YIELD MODEL
+═══════════════════════════════════════════ -->
+<div id="pg-yield" class="page">
+<div class="shd">Yield Prediction Model — Forecasting Harvests from Space 45 Days Early</div>
+
+<div class="krow">
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--green),var(--green2))"></div><span class="kc-icon">🎯</span><div class="kc-lbl">Overall Accuracy</div><div class="kc-val" style="color:var(--green)">8.2%</div><div class="kc-sub">error · beats 10% industry benchmark</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--blue),var(--blue2))"></div><span class="kc-icon">📅</span><div class="kc-lbl">Training Data Span</div><div class="kc-val" style="color:var(--blue)">23 yrs</div><div class="kc-sub">harvest records 2000–2022</div><div class="kc-def">We trained the AI on 23 years of real harvest data paired with satellite imagery — teaching it what a good vs bad season looks like from space. More historical data = better pattern recognition.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--green),var(--teal))"></div><span class="kc-icon">🏆</span><div class="kc-lbl">Best District</div><div class="kc-val" style="color:var(--green)">1.0%</div><div class="kc-sub">error · Ludhiana (healthy crops)</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--amber),var(--amber2))"></div><span class="kc-icon">📉</span><div class="kc-lbl">Hardest District</div><div class="kc-val" style="color:var(--amber)">3.2%</div><div class="kc-sub">error · Bathinda (severe stress)</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--purple),var(--purple2))"></div><span class="kc-icon">🔭</span><div class="kc-lbl">Forecast Lead Time</div><div class="kc-val" style="color:var(--purple)">45 days</div><div class="kc-sub">before physical harvest begins</div><div class="kc-def">45 days of advance notice means banks can restructure problematic loans, insurance companies can pre-position claims, and farmers can plan selling strategy — all before a single grain is cut.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--red),var(--red2))"></div><span class="kc-icon">🚨</span><div class="kc-lbl">Flagged for Review</div><div class="kc-val" style="color:var(--red)">3</div><div class="kc-sub">districts need credit reassessment</div></div>
+</div>
+
+<div class="panel">
+  <div class="ph"><div><div class="pt">Satellite Prediction vs Real Harvest — Full District Comparison</div><div class="ps">Validation set · Rabi 2021–23 · kg/ha = kilograms of wheat harvested per hectare of farmland</div></div><span class="badge bg">✓ MAPE 8.2%</span></div>
+  <div class="def"><strong>How to read this</strong>Each pair of bars is one district. Green = predicted by satellite AI before harvest. Blue = what farmers actually collected. The gap between bars = prediction error. Even in the most stressed district (Bathinda), we're within 3.2% — that's less than 1 bag per 30 bags harvested.</div>
+  <div class="leg"><span class="li"><span class="ld" style="background:var(--green)"></span>Predicted yield (kg/ha)</span><span class="li"><span class="ld" style="background:var(--blue)"></span>Actual harvest (kg/ha)</span></div>
+  <div style="position:relative;width:100%;height:300px;margin-top:10px"><canvas id="yd_bar"></canvas></div>
+  <div class="src-row"><span class="src">📡 Sentinel-2 NDVI (ESA)</span><span class="src">🧠 XGBoost model</span><span class="src">☁️ NASA POWER weather</span><span class="src">📂 FAOSTAT yield history</span><span class="src">🌱 SoilGrids 250m</span></div>
+</div>
+
+<div class="g2">
+  <div class="panel">
+    <div class="ph"><div><div class="pt">Greener Crops = More Wheat? (Yes — R²=0.87)</div><div class="ps">Each dot = one district · colour = risk tier · validates NDVI as a reliable yield signal</div></div></div>
+    <div class="def"><strong>What is R²?</strong>R-squared of 0.87 means 87% of the difference in yields between districts can be explained by how green the crops looked from space in February. A perfect predictor would be 1.0. 0.87 is excellent for agriculture, where weather and soil vary enormously.</div>
+    <div style="position:relative;width:100%;height:270px;margin-top:12px"><canvas id="yd_scatter"></canvas></div>
+    <div class="src-row"><span class="src">📡 Sentinel-2 (ESA)</span><span class="src">📂 FAOSTAT validation</span></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><div><div class="pt">Why Did the AI Predict That? (Full Explainability)</div><div class="ps">SHAP feature importance — each factor's contribution to the yield prediction</div></div></div>
+    <div class="def"><strong>Why explainability matters for banks</strong>Regulators require banks to justify credit decisions. SHAP lets us say: "We reduced this farmer's loan because February NDVI was 28% below normal and stress z-score fell 22% below average" — not because of an opaque algorithm. This is critical for regulatory compliance.</div>
+    <div style="position:relative;width:100%;height:270px;margin-top:12px"><canvas id="yd_shap"></canvas></div>
+    <div class="src-row"><span class="src">🧠 SHAP v0.44</span><span class="src">🌾 XGBoost</span><span class="src">☁️ NASA POWER GDD</span></div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="ph"><div><div class="pt">Full District Results — Rabi 2022–23</div><div class="ps">Complete output table used by bank credit managers to set KCC (Kisan Credit Card) loan limits</div></div></div>
+  <div class="def"><strong>What is KCC?</strong>Kisan Credit Card is India's primary agricultural loan product — a revolving credit line given to farmers. The limit is set based on expected harvest value. Previously banks guessed this from a single field visit. Our model provides district-level evidence updated every 5 days.</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>District</th><th>Predicted Yield</th><th>Actual Yield</th><th>Error %</th><th>Risk Level</th><th>Recommended Bank Action</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Ludhiana</strong></td><td>5,100 kg/ha</td><td>5,050 kg/ha</td><td>1.0%</td><td><span class="badge bg">✓ Normal</span></td><td>Approve full KCC limit</td></tr>
+        <tr><td><strong>Patiala</strong></td><td>4,950 kg/ha</td><td>4,900 kg/ha</td><td>1.0%</td><td><span class="badge bg">✓ Normal</span></td><td>Approve full KCC limit</td></tr>
+        <tr><td><strong>Amritsar</strong></td><td>4,820 kg/ha</td><td>4,750 kg/ha</td><td>1.5%</td><td><span class="badge bg">✓ Normal</span></td><td>Approve full KCC limit</td></tr>
+        <tr><td><strong>Mansa</strong></td><td>2,980 kg/ha</td><td>2,900 kg/ha</td><td>2.8%</td><td><span class="badge ba">⚠ Moderate</span></td><td>Hold limit, monitor weekly</td></tr>
+        <tr><td><strong>Faridkot</strong></td><td>3,050 kg/ha</td><td>2,980 kg/ha</td><td>2.3%</td><td><span class="badge br">🚨 High Risk</span></td><td>Reduce KCC limit 20–40%</td></tr>
+        <tr><td><strong>Bathinda</strong></td><td>3,200 kg/ha</td><td>3,100 kg/ha</td><td>3.2%</td><td><span class="badge br">🚨 High Risk</span></td><td>Pre-position collections Apr 15</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="src-row" style="margin-top:12px"><span class="src">📡 Sentinel-2 (ESA/Copernicus)</span><span class="src">☁️ NASA POWER API</span><span class="src">🌱 SoilGrids 250m</span><span class="src">📂 FAOSTAT / data.gov.in</span></div>
+</div>
+</div><!-- /yield -->
+
+
+<!-- ═══════════════════════════════════════════
+     STRESS DETECTION
+═══════════════════════════════════════════ -->
+<div id="pg-stress" class="page">
+<div class="shd">Satellite Crop Stress Detection — 6-Week Early Warning System</div>
+
+<div class="krow">
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--blue),var(--blue2))"></div><span class="kc-icon">📡</span><div class="kc-lbl">Satellite Scenes Processed</div><div class="kc-val" style="color:var(--blue)">847</div><div class="kc-sub">Nov 2022 – Apr 2023</div><div class="kc-def">Each "scene" is one photograph taken by the European Space Agency's Sentinel-2 satellite from 786 km altitude. We processed 847 of them this season — one every 5 days, completely automated.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--purple),var(--purple2))"></div><span class="kc-icon">🔬</span><div class="kc-lbl">Ground Patches Analysed</div><div class="kc-val" style="color:var(--purple)">660M</div><div class="kc-sub">pixels · 10m × 10m each</div><div class="kc-def">660 million individual 10×10 metre patches of farmland scanned. Every farm in Punjab — individually measured from space. No sampling, no blind spots.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--red),var(--red2))"></div><span class="kc-icon">🚨</span><div class="kc-lbl">Critical Alerts Issued</div><div class="kc-val" style="color:var(--red)">2</div><div class="kc-sub">z-score below −2.0 threshold</div><div class="kc-def">A "critical" alert means crop health has dropped so far below normal that significant yield loss is near-certain. These 2 districts carry hundreds of thousands of active farm loans.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--amber),var(--amber2))"></div><span class="kc-icon">⚠️</span><div class="kc-lbl">Moderate Alerts</div><div class="kc-val" style="color:var(--amber)">1</div><div class="kc-sub">z-score between −1.5 and −2.0</div><div class="kc-def">Moderate = crops below normal but not yet catastrophic. Monitor every satellite pass (every 5 days). Could escalate to critical if trend continues.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--green),var(--teal))"></div><span class="kc-icon">⏱️</span><div class="kc-lbl">Warning Lead Time</div><div class="kc-val" style="color:var(--green)">6 Weeks</div><div class="kc-sub">before visible crop damage</div><div class="kc-def">The satellite detects the stress signal 6 weeks before a human eye can see it. That gap is the difference between proactive loan restructuring and reacting to a sudden default wave.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--teal),#00838f)"></div><span class="kc-icon">🚗</span><div class="kc-lbl">Field Visits Replaced</div><div class="kc-val" style="color:var(--teal)">60%</div><div class="kc-sub">₹400 per visit saved at scale</div><div class="kc-def">Banks used to physically inspect every farm before loan decisions. Satellite data replaces 60% of those visits with more frequent, more objective data — at a fraction of the cost.</div></div>
+</div>
+
+<div class="g2">
+  <div class="panel">
+    <div class="ph"><div><div class="pt">How Crop Health Changed Through the Season</div><div class="ps">Monthly NDVI satellite health scores · Nov 2022 – Apr 2023 · healthy vs stressed district</div></div></div>
+    <div class="def"><strong>What is NDVI?</strong>NDVI (Normalised Difference Vegetation Index) is a 0–1 score from satellite infrared light measuring how green and photosynthetically active crops are. Above 0.7 = lush, healthy wheat. Below 0.5 in February = serious trouble. It's a satellite "health thermometer" for crops. Source: ESA Sentinel-2 SR, Band 8 (NIR) and Band 4 (Red).</div>
+    <div class="leg"><span class="li"><span class="ld" style="background:var(--green)"></span>Ludhiana — healthy</span><span class="li"><span class="ld" style="background:var(--red)"></span>Bathinda — stressed</span><span class="li"><span class="ld" style="background:#546e7a"></span>10-year average</span></div>
+    <div style="position:relative;width:100%;height:280px"><canvas id="st_ndvi"></canvas></div>
+    <div class="src-row"><span class="src">📡 Sentinel-2 SR (ESA)</span><span class="src">🔢 NDVI = (NIR−Red)/(NIR+Red)</span></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><div><div class="pt">Crop Health Heatmap — Every District, Every Month</div><div class="ps">Bright green = healthy · Red = severe stress · February column is highlighted — the critical grain-fill month</div></div></div>
+    <div class="def"><strong>Why February matters</strong>February is when wheat grains physically form inside the plant — called "grain fill." Any stress during this 4-week window directly reduces grain count and weight, cutting final yield. Our alert system is specifically tuned to this window because stress here is irreversible.</div>
+    <div id="heatmap" style="margin-top:14px;overflow-x:auto"></div>
+    <div class="src-row"><span class="src">📡 Sentinel-2 median composites</span><span class="src">📅 Monthly aggregation</span></div>
+  </div>
+</div>
+
+<div class="g2">
+  <div class="panel">
+    <div class="ph"><div><div class="pt">District Stress Z-Scores — February Alert Window</div><div class="ps">Alert threshold at −2.0 · below this = credit review required</div></div><span class="badge br">Feb Alert</span></div>
+    <div class="def"><strong>The −2.0 rule</strong>A z-score below −2.0 is our bank alert trigger. Statistically, NDVI only drops this far in the worst 2.5% of historical seasons. When we see it, 20–40% yield loss is expected — which translates directly to loan repayment risk. Source: 10-year NDVI baseline per district.</div>
+    <div style="position:relative;width:100%;height:250px;margin-top:12px"><canvas id="st_zscore"></canvas></div>
+    <div class="src-row"><span class="src">📡 Sentinel-2 (ESA)</span><span class="src">📊 Baseline: 2012–2022 mean</span></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><div><div class="pt">Does Satellite Stress Actually Predict Yield Loss?</div><div class="ps">Each dot = one district · proves the business case for this platform</div></div></div>
+    <div class="def"><strong>The proof</strong>This chart shows that Bathinda's z-score of −3.1 corresponds to a 36% actual yield loss — and that relationship holds consistently across all districts. Satellite stress score = real harvest loss = real loan repayment risk. This validates the entire platform.</div>
+    <div style="position:relative;width:100%;height:250px;margin-top:12px"><canvas id="st_impact"></canvas></div>
+    <div class="src-row"><span class="src">📡 Sentinel-2 NDVI z-score</span><span class="src">📂 FAOSTAT yield ground truth</span></div>
+  </div>
+</div>
+</div><!-- /stress -->
+
+
+<!-- ═══════════════════════════════════════════
+     PRICE FORECAST
+═══════════════════════════════════════════ -->
+<div id="pg-price" class="page">
+<div class="shd">Agricultural Commodity Price Forecasting — 30 Days Ahead</div>
+
+<div class="krow">
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--green),var(--green2))"></div><span class="kc-icon">🌾</span><div class="kc-lbl">Wheat Price Error</div><div class="kc-val" style="color:var(--green)">9.1%</div><div class="kc-sub">30-day forecast · most accurate</div><div class="kc-def">Wheat is partially government-stabilised via MSP (minimum support price), making it more predictable. 9.1% error on ₹2,200/quintal means our forecast is typically within ₹200.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--amber),var(--amber2))"></div><span class="kc-icon">🧅</span><div class="kc-lbl">Onion Price Error</div><div class="kc-val" style="color:var(--amber)">14.8%</div><div class="kc-sub">highly volatile commodity</div><div class="kc-def">Onion prices can swing 50–200% in a single month due to weather events, transport blockages, and political decisions on export bans. 14.8% is commercially useful for this notoriously volatile crop.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--red),var(--red2))"></div><span class="kc-icon">🍅</span><div class="kc-lbl">Tomato Price Error</div><div class="kc-val" style="color:var(--red)">18.2%</div><div class="kc-sub">perishable · hardest to forecast</div><div class="kc-def">Tomatoes rot within days, making prices hyper-sensitive to local supply shocks. Even 18.2% error is competitive for this commodity — most commercial models perform worse.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--blue),var(--blue2))"></div><span class="kc-icon">🏪</span><div class="kc-lbl">Mandis Tracked</div><div class="kc-val" style="color:var(--blue)">48</div><div class="kc-sub">wholesale markets via AGMARKNET</div><div class="kc-def">A "mandi" is an agricultural wholesale market — the physical marketplace where farmers bring produce to sell to traders. We track daily prices from 48 mandis across Punjab via the government's AGMARKNET database.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--purple),var(--purple2))"></div><span class="kc-icon">📚</span><div class="kc-lbl">Price History Used</div><div class="kc-val" style="color:var(--purple)">8 Years</div><div class="kc-sub">2015–2022 training data</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--teal),#00838f)"></div><span class="kc-icon">🔗</span><div class="kc-lbl">External Signals</div><div class="kc-val" style="color:var(--teal)">4</div><div class="kc-sub">MSP · monsoon · diesel · futures</div><div class="kc-def">Beyond price history, the model uses: MSP (govt minimum price floor), monsoon forecasts (affect next supply season), diesel prices (transport costs), and commodity futures market data.</div></div>
+</div>
+
+<div class="panel">
+  <div class="ph"><div><div class="pt">30-Day Wheat Price Forecast vs Actual — Ludhiana Mandi 2023</div><div class="ps">SARIMA + LightGBM ensemble · Shaded = 80% confidence interval · Dotted red = govt MSP floor ₹2,015/quintal</div></div><span class="badge bg">MAPE 9.1%</span></div>
+  <div class="def"><strong>Key terms explained</strong> · <strong>Quintal</strong> = 100 kg (standard grain trade unit in India) · <strong>MSP (Minimum Support Price)</strong> = the government-guaranteed floor price; farmers are legally protected from selling below this · <strong>Confidence interval (shaded)</strong> = the range where actual price will land 80% of the time · <strong>SARIMA</strong> = Seasonal ARIMA, a statistical model capturing seasonal price cycles · <strong>LightGBM</strong> = a gradient-boosted ML model incorporating yield data, weather, and logistics signals · <strong>Ensemble</strong> = combining both models for better accuracy than either alone</div>
+  <div class="leg" style="margin-top:14px"><span class="li"><span class="ld" style="background:var(--blue)"></span>Actual price</span><span class="li"><span class="ld" style="background:var(--green)"></span>Our forecast</span><span class="li"><span class="ld" style="background:var(--amber);opacity:.7"></span>80% confidence band</span><span class="li"><span class="ld" style="background:var(--red)"></span>MSP govt floor</span></div>
+  <div style="position:relative;width:100%;height:300px;margin-top:10px"><canvas id="pr_main"></canvas></div>
+  <div class="src-row"><span class="src">🏪 AGMARKNET daily prices</span><span class="src">📊 SARIMA (statsmodels)</span><span class="src">🤖 LightGBM</span><span class="src">🌧️ IMD monsoon data</span><span class="src">⛽ PPAC diesel index</span></div>
+</div>
+
+<div class="g3">
+  <div class="panel">
+    <div class="ph"><div><div class="pt">Stats vs AI vs Combined</div><div class="ps">MAPE % per commodity — lower is better</div></div></div>
+    <div class="def"><strong>Why combine both?</strong>SARIMA captures seasonal patterns. LightGBM captures complex non-linear relationships. Together they outperform either alone — a well-established principle in forecasting called "ensemble learning."</div>
+    <div style="position:relative;width:100%;height:200px;margin-top:12px"><canvas id="pr_comp"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><div><div class="pt">Wheat Price Through the Year</div><div class="ps">Average ₹/quintal by month — seasonal pattern</div></div></div>
+    <div class="def"><strong>Sell timing matters</strong>Prices drop just after harvest (Apr–May) when supply floods markets, then rise pre-harvest (Nov–Jan) when stock depletes. Our forecast helps farmers time their sales rather than selling at the seasonal low.</div>
+    <div style="position:relative;width:100%;height:200px;margin-top:12px"><canvas id="pr_season"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><div><div class="pt">What Drives Wheat Prices Most?</div><div class="ps">LightGBM feature importance</div></div></div>
+    <div class="def"><strong>Markets have memory</strong>"Last week's price" (32%) is the single strongest predictor — prices adjust gradually, not randomly. Monsoon (20%) matters because it shapes expectations for next season's supply before a seed is planted.</div>
+    <div style="position:relative;width:100%;height:200px;margin-top:12px"><canvas id="pr_feat"></canvas></div>
+  </div>
+</div>
+</div><!-- /price -->
+
+
+<!-- ═══════════════════════════════════════════
+     CREDIT RISK
+═══════════════════════════════════════════ -->
+<div id="pg-credit" class="page">
+<div class="shd">Agricultural Credit Risk — How Banks Use Satellite Data for Loan Decisions</div>
+
+<div class="krow">
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--green),var(--green2))"></div><span class="kc-icon">📉</span><div class="kc-lbl">NPA Reduction Target</div><div class="kc-val" style="color:var(--green)">3–4%</div><div class="kc-sub">fewer loan defaults expected</div><div class="kc-def">NPA = Non-Performing Asset. Industry term for a loan the bank cannot recover. Every 1% NPA reduction on a ₹10,000 Crore agricultural loan portfolio saves ₹100 Crore in bad debt annually.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--teal),#00838f)"></div><span class="kc-icon">⚡</span><div class="kc-lbl">Loan Approval Speed</div><div class="kc-val" style="color:var(--teal)">8 Hrs</div><div class="kc-sub">down from 3 weeks manually</div><div class="kc-def">Previously: bank officer visits farm → writes report → committee review → 3 weeks. Now: satellite data feeds directly into the model → credit decision in 8 hours, no human required.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--blue),var(--blue2))"></div><span class="kc-icon">🚗</span><div class="kc-lbl">Field Visits Eliminated</div><div class="kc-val" style="color:var(--blue)">60%</div><div class="kc-sub">₹400 cost per visit saved</div><div class="kc-def">India's public banks conduct tens of millions of farm visits per year. Each costs ~₹400 in staff time and travel. Eliminating 60% via satellite is a transformative operational saving at scale.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--amber),var(--amber2))"></div><span class="kc-icon">👨‍🌾</span><div class="kc-lbl">New Farmers Reachable</div><div class="kc-val" style="color:var(--amber)">83M</div><div class="kc-sub">previously "credit-invisible"</div><div class="kc-def">83 million Indian farmers have never had a formal bank loan because banks had no way to assess their farms. Satellite data creates a "credit profile from space" — first-time loans without paperwork or field visits.</div></div>
+</div>
+
+<div class="g2">
+  <div class="panel">
+    <div class="ph"><div><div class="pt">Portfolio Risk Breakdown — This Season</div><div class="ps">Risk tier distribution across all monitored districts · Rabi 2022–23</div></div></div>
+    <div class="def"><strong>Risk tier definitions</strong> · <strong>Green (Normal)</strong> — harvest on track; loan repayment very likely · <strong>Amber (Moderate)</strong> — mild stress detected; watch but no action yet · <strong>Red (High Risk)</strong> — severe crop stress; reduce KCC limits and pre-position debt recovery before harvest</div>
+    <div style="position:relative;width:100%;height:270px;margin-top:14px"><canvas id="cr_donut"></canvas></div>
+    <div class="src-row"><span class="src">📡 Sentinel-2 z-score tiers</span><span class="src">🏦 KCC portfolio data</span></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><div><div class="pt">Automated Bank Report — Bathinda District 🚨</div><div class="ps">The PDF auto-generated for bank credit managers every 5 days — no human analysis needed</div></div></div>
+    <div class="def"><strong>What banks receive automatically</strong>Every 5 days (matching satellite frequency), every bank with agricultural exposure receives this report per district. Credit managers get a clear action item, not raw data to decipher. This is the entire value proposition — from satellite pixel to bank decision, fully automated.</div>
+    <div class="mono">
+SATSOURCE REPORT — BATHINDA DISTRICT<br>
+Season: Rabi 2022–23 &nbsp;| Crop: Wheat<br>
+Generated: 2023-02-15 08:42 UTC<br>
+──────────────────────────────────────────<br>
+SATELLITE CROP HEALTH (NDVI)<br>
+&nbsp;&nbsp;Current greenness score &nbsp;&nbsp;&nbsp;&nbsp; <span class="amb">0.44</span><br>
+&nbsp;&nbsp;10-year Feb average &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.75<br>
+&nbsp;&nbsp;Stress deviation (Z-Score): &nbsp;<span class="red">−3.1 [CRITICAL]</span><br>
+──────────────────────────────────────────<br>
+AI YIELD FORECAST (XGBoost)<br>
+&nbsp;&nbsp;Predicted harvest &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3,200 kg/ha<br>
+&nbsp;&nbsp;vs. district average &nbsp;&nbsp;&nbsp;&nbsp; <span class="red">−33% below normal</span><br>
+&nbsp;&nbsp;80% confidence range &nbsp;&nbsp;&nbsp; [2,850 – 3,550 kg/ha]<br>
+──────────────────────────────────────────<br>
+CREDIT RECOMMENDATION<br>
+&nbsp;&nbsp;Risk rating: &nbsp;&nbsp;&nbsp;&nbsp; <span class="red">🔴 RED — HIGH RISK</span><br>
+&nbsp;&nbsp;Action: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reduce KCC limit by 40%<br>
+&nbsp;&nbsp;Collections: &nbsp;&nbsp;&nbsp;&nbsp; <span class="grn">Pre-position by April 15</span>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="ph"><div><div class="pt">Complete Credit Decision Framework</div><div class="ps">How satellite z-scores map to specific loan actions — the rulebook used by every bank credit manager using this platform</div></div></div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Z-Score Range</th><th>Risk Level</th><th>Plain English Meaning</th><th>Satellite NDVI Reading</th><th>Bank Action</th><th>Expected Yield Loss</th></tr></thead>
+      <tbody>
+        <tr><td><strong>&gt; −1.5</strong></td><td><span class="badge bg">✓ Normal</span></td><td>Crops growing as expected or better</td><td>NDVI ≥ 0.65 in February</td><td>Approve full KCC limit</td><td>Less than 5%</td></tr>
+        <tr><td><strong>−1.5 to −2.0</strong></td><td><span class="badge ba">⚠ Moderate</span></td><td>Crops slightly below average — some stress</td><td>NDVI 0.55–0.65</td><td>Hold limit, monitor every 5 days</td><td>5–20%</td></tr>
+        <tr><td><strong>−2.0 to −3.0</strong></td><td><span class="badge br">🚨 Critical</span></td><td>Significant stress — yield hit is near-certain</td><td>NDVI 0.44–0.55</td><td>Reduce KCC limit by 20–40%</td><td>20–40%</td></tr>
+        <tr><td><strong>Below −3.0</strong></td><td><span class="badge" style="background:rgba(213,0,0,.15);color:#ff5252;border:1px solid rgba(213,0,0,.5)">💀 Severe</span></td><td>Near crop failure — high default probability</td><td>NDVI below 0.44</td><td>Pre-position collections + alert insurer</td><td>Over 40%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="info" style="margin-top:16px"><div class="info-lbl">💡 The Scale of the Opportunity</div><div class="info-txt">India has <strong>150 million farming households</strong>. Agricultural credit assessment still relies largely on methods from the 1970s — paper forms and manual field visits. This satellite pipeline delivers institutional-grade credit analytics to every farm in India at the cost of a broadband subscription, not a field inspection army.</div></div>
+  <div class="src-row" style="margin-top:14px"><span class="src">📡 Sentinel-2 NDVI baseline</span><span class="src">🏦 RBI KCC guidelines</span><span class="src">📊 10-year historical z-score calibration</span></div>
+</div>
+</div><!-- /credit -->
+
+
+<!-- ═══════════════════════════════════════════
+     DATA PIPELINE
+═══════════════════════════════════════════ -->
+<div id="pg-pipeline" class="page">
+<div class="shd">Data Pipeline — From Satellite Image to Bank Alert in 8 Hours</div>
+
+<div class="krow">
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--blue),var(--blue2))"></div><span class="kc-icon">🗄️</span><div class="kc-lbl">Data Sources</div><div class="kc-val" style="color:var(--blue)">6</div><div class="kc-sub">all free and publicly accessible</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--green),var(--green2))"></div><span class="kc-icon">📓</span><div class="kc-lbl">Analysis Notebooks</div><div class="kc-val" style="color:var(--green)">9</div><div class="kc-sub">raw data to final bank report</div><div class="kc-def">9 interconnected Jupyter notebooks handle different pipeline stages: satellite ingestion → NDVI computation → yield modelling → price forecasting → credit scoring → PDF report generation.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--purple),var(--purple2))"></div><span class="kc-icon">✅</span><div class="kc-lbl">Automated Tests</div><div class="kc-val" style="color:var(--purple)">24</div><div class="kc-sub" style="color:var(--green)">all currently passing</div><div class="kc-def">Like spell-check for code — 24 automated quality checks run every time the pipeline updates, catching errors (wrong units, failed API calls, corrupt data) before they reach any bank report.</div></div>
+  <div class="kc"><div class="kc-top" style="background:linear-gradient(90deg,var(--teal),#00838f)"></div><span class="kc-icon">⚡</span><div class="kc-lbl">End-to-End Latency</div><div class="kc-val" style="color:var(--teal)">8 Hours</div><div class="kc-sub">satellite pass → bank dashboard</div></div>
+</div>
+
+<div class="g2">
+  <div class="panel">
+    <div class="ph"><div><div class="pt">All 6 Data Sources — What Each Contributes</div><div class="ps">Source · data type · access method · update frequency</div></div></div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Source</th><th>What It Provides</th><th>Access Method</th><th>Frequency</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Sentinel-2 SR (ESA)</strong></td><td>Optical satellite photos → NDVI crop health scores</td><td>Google Earth Engine API</td><td><span class="badge bg">Every 5 days</span></td></tr>
+          <tr><td><strong>Sentinel-1 SAR (ESA)</strong></td><td>Radar imagery → works through clouds</td><td>Google Earth Engine API</td><td><span class="badge bg">Every 6 days</span></td></tr>
+          <tr><td><strong>NASA POWER</strong></td><td>Rainfall, temperature, solar radiation per district</td><td>REST API (free)</td><td><span class="badge bg">Daily</span></td></tr>
+          <tr><td><strong>AGMARKNET (Govt India)</strong></td><td>Live mandi market prices across India</td><td>Web scraper</td><td><span class="badge bg">Daily</span></td></tr>
+          <tr><td><strong>SoilGrids 250m (ISRIC)</strong></td><td>Soil type, organic carbon, water retention</td><td>REST API (free)</td><td><span class="badge bb">Seasonal</span></td></tr>
+          <tr><td><strong>FAOSTAT / data.gov.in</strong></td><td>Historical district yield records (23 years)</td><td>CSV download</td><td><span class="badge bb">Annual</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><div><div class="pt">Full Technology Stack</div><div class="ps">Every library used — from raw satellite data to bank-ready dashboard</div></div></div>
+    <div class="sep">📥 Data Collection Layer</div>
+    <div class="chips"><span class="badge bb">earthengine-api</span><span class="badge bb">rasterio</span><span class="badge bb">geopandas</span><span class="badge bb">rasterstats</span><span class="badge bb">requests</span><span class="badge bb">pandas</span></div>
+    <div class="sep">🧠 AI & Modelling Layer</div>
+    <div class="chips"><span class="badge bg">xgboost</span><span class="badge bg">lightgbm</span><span class="badge bg">statsmodels</span><span class="badge bp">shap</span><span class="badge bg">scikit-learn</span><span class="badge bg">tensorflow</span></div>
+    <div class="sep">📤 Delivery & Reporting Layer</div>
+    <div class="chips"><span class="badge ba">streamlit</span><span class="badge ba">plotly</span><span class="badge ba">folium</span><span class="badge ba">reportlab</span><span class="badge ba">pytest</span><span class="badge ba">GitHub Actions</span></div>
+    <div class="info" style="margin-top:14px"><div class="info-lbl">🚀 Deployment</div><div class="info-txt">Live on Streamlit Cloud (free tier) · Automated CI/CD via GitHub Actions · PDF bank reports via ReportLab · All 24 tests auto-run on every data update</div></div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="ph"><div><div class="pt">The 8-Hour Journey: Satellite Pass → Bank Alert</div><div class="ps">Every automated step from raw satellite image to a credit manager receiving their risk report</div></div></div>
+  <div class="latgrid">
+    <div class="latcard">
+      <div style="font-size:13px;font-weight:800;color:var(--text3)">① Satellite passes</div>
+      <div class="lattime">0 hrs</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:6px;line-height:1.5">ESA's Sentinel-2 photographs Punjab from 786 km altitude. Image published to ESA server automatically.</div>
+    </div>
+    <div class="latcard">
+      <div style="font-size:13px;font-weight:800;color:var(--text3)">② Cloud removal + NDVI</div>
+      <div class="lattime">+3 hrs</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:6px;line-height:1.5">Google Earth Engine strips cloud cover, computes NDVI health scores across 660M field patches.</div>
+    </div>
+    <div class="latcard">
+      <div style="font-size:13px;font-weight:800;color:var(--text3)">③ District aggregation</div>
+      <div class="lattime">+4 hrs</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:6px;line-height:1.5">PostGIS database averages pixel values across official district boundaries into one score per district.</div>
+    </div>
+    <div class="latcard">
+      <div style="font-size:13px;font-weight:800;color:var(--text3)">④ AI model runs</div>
+      <div class="lattime">+6 hrs</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:6px;line-height:1.5">XGBoost predicts yield. Z-score computed. Risk tier (Normal / Moderate / Critical) assigned per district.</div>
+    </div>
+    <div class="latcard done">
+      <div style="font-size:13px;font-weight:800;color:var(--green)">⑤ Bank alert sent ✓</div>
+      <div class="lattime">+8 hrs</div>
+      <div style="font-size:12px;color:var(--green);margin-top:6px;line-height:1.5">Dashboard updates. PDF report emails to credit teams. Collections pre-positioned if critical alert triggered.</div>
+    </div>
+  </div>
+  <div class="alert" style="margin-top:20px"><div class="alert-lbl">🔄 Fully Automated — Runs Every 5 Days</div><div class="alert-txt">No human required at any stage. Every new Sentinel-2 satellite image triggers the entire pipeline automatically via GitHub Actions — raw satellite pixels to bank credit report in under 8 hours, 365 days a year.</div></div>
+</div>
+</div><!-- /pipeline -->
+
+
+<script>
+function go(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pg-'+id).classList.add('on');
+  btn.classList.add('on');
+}
+
+const gc='rgba(255,255,255,0.05)',tc='#7a94bb';
+const tip={backgroundColor:'#0d1b35',titleColor:'#f0f6ff',bodyColor:'#c8d8f0',borderColor:'rgba(255,255,255,0.14)',borderWidth:1,padding:13,cornerRadius:10};
+const base={responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:tip},
+  scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:11.5}}},y:{grid:{color:gc},ticks:{color:tc,font:{size:11.5}}}}};
+
+const D=['Ludhiana','Patiala','Amritsar','Mansa','Faridkot','Bathinda'];
+const P=[5100,4950,4820,2980,3050,3200];
+const A=[5050,4900,4750,2900,2980,3100];
+const DC=['#00e676','#00e676','#00e676','#ffca28','#ff5252','#e53935'];
+
+// Overview yield
+new Chart(document.getElementById('ov_yield'),{type:'bar',data:{labels:D,datasets:[
+  {label:'Predicted',data:P,backgroundColor:'#00e676',borderRadius:7},
+  {label:'Actual',data:A,backgroundColor:'#29b6f6',borderRadius:7}
+]},options:{...base,scales:{...base.scales,y:{...base.scales.y,min:2000,ticks:{...base.scales.y.ticks,callback:v=>v.toLocaleString()+' kg'}}},
+  plugins:{...base.plugins,legend:{display:true,labels:{boxWidth:12,font:{size:12},color:tc,padding:16}}}}});
+
+// Overview accuracy
+new Chart(document.getElementById('ov_acc'),{type:'bar',data:{
+  labels:['Wheat Yield','Wheat Price','Onion Price','Tomato Price'],
+  datasets:[{data:[8.2,9.1,14.8,18.2],backgroundColor:['#00e676','#00e676','#ffca28','#ff5252'],borderRadius:7}]
+},options:{...base,scales:{...base.scales,y:{...base.scales.y,ticks:{...base.scales.y.ticks,callback:v=>v+'%'}}}}});
+
+// Overview SHAP
+new Chart(document.getElementById('ov_shap'),{type:'bar',data:{
+  labels:['NDVI Peak','Stress Z-Score','Rainfall','Heat (GDD)','Crop Timing','Soil Carbon'],
+  datasets:[{data:[28,22,18,14,10,5],backgroundColor:['#00e676','#ff5252','#29b6f6','#ffca28','#ce93d8','#26c6da'],borderRadius:5}]
+},options:{...base,indexAxis:'y',scales:{...base.scales,x:{...base.scales.x,ticks:{...base.scales.x.ticks,callback:v=>v+'%'}}}}});
+
+// Yield bar
+new Chart(document.getElementById('yd_bar'),{type:'bar',data:{labels:D,datasets:[
+  {label:'Predicted',data:P,backgroundColor:'#00e676',borderRadius:7},
+  {label:'Actual',data:A,backgroundColor:'#29b6f6',borderRadius:7}
+]},options:{...base,scales:{...base.scales,y:{...base.scales.y,min:2000,ticks:{...base.scales.y.ticks,callback:v=>v.toLocaleString()+' kg'}}},
+  plugins:{...base.plugins,legend:{display:true,labels:{boxWidth:12,font:{size:12},color:tc,padding:16}}}}});
+
+// Yield scatter
+new Chart(document.getElementById('yd_scatter'),{type:'scatter',data:{datasets:[{
+  data:[{x:0.78,y:5050},{x:0.77,y:4900},{x:0.74,y:4750},{x:0.40,y:2900},{x:0.41,y:2980},{x:0.44,y:3100}],
+  backgroundColor:DC,pointRadius:14,pointHoverRadius:18
+}]},options:{...base,
+  plugins:{...base.plugins,tooltip:{...tip,callbacks:{label:ctx=>D[ctx.dataIndex]+': NDVI '+ctx.raw.x+' → '+ctx.raw.y.toLocaleString()+' kg/ha'}}},
+  scales:{
+    x:{...base.scales.x,min:.35,max:.85,title:{display:true,text:'Peak NDVI greenness score (February)',color:tc,font:{size:12}}},
+    y:{...base.scales.y,min:2600,max:5400,ticks:{...base.scales.y.ticks,callback:v=>v.toLocaleString()+' kg'}}
+  }}});
+
+// Yield SHAP
+new Chart(document.getElementById('yd_shap'),{type:'bar',data:{
+  labels:['NDVI peak (Feb)','Stress z-score','Rabi rainfall','Heat sum (GDD)','NDVI timing','Soil carbon'],
+  datasets:[{data:[28,22,18,14,10,5],backgroundColor:['#00e676','#ff5252','#29b6f6','#ffca28','#ce93d8','#26c6da'],borderRadius:5}]
+},options:{...base,indexAxis:'y',scales:{...base.scales,x:{...base.scales.x,ticks:{...base.scales.x.ticks,callback:v=>v+'%'}}}}});
+
+// Stress NDVI
+const MO=['Nov','Dec','Jan','Feb','Mar','Apr'];
+new Chart(document.getElementById('st_ndvi'),{type:'line',data:{labels:MO,datasets:[
+  {label:'Ludhiana (healthy)',data:[.35,.56,.74,.78,.75,.40],borderColor:'#00e676',borderWidth:3,pointRadius:6,tension:.3,backgroundColor:'rgba(0,230,118,.08)',fill:true},
+  {label:'Bathinda (stressed)',data:[.28,.44,.55,.44,.48,.30],borderColor:'#ff5252',borderWidth:3,pointRadius:6,tension:.3,backgroundColor:'rgba(255,82,82,.08)',fill:true},
+  {label:'10-year average',data:[.32,.53,.72,.76,.73,.38],borderColor:'#546e7a',borderWidth:2,borderDash:[6,4],pointRadius:3,tension:.3,backgroundColor:'transparent'}
+]},options:{...base,
+  scales:{...base.scales,y:{...base.scales.y,min:.2,max:.9,title:{display:true,text:'NDVI Score (0=bare soil · 1=lush crop)',color:tc,font:{size:12}}}},
+  plugins:{...base.plugins,legend:{display:true,labels:{boxWidth:12,font:{size:12},color:tc,padding:16}}}}});
+
+// Heatmap
+(function(){
+  const hd={Ludhiana:[.35,.56,.74,.78,.75,.40],Patiala:[.34,.55,.73,.77,.74,.39],Amritsar:[.31,.52,.68,.74,.71,.36],Mansa:[.26,.42,.53,.40,.46,.28],Faridkot:[.27,.43,.54,.41,.48,.29],Bathinda:[.28,.44,.55,.44,.48,.30]};
+  const ms=['Nov','Dec','Jan','Feb ⚠','Mar','Apr'];
+  let h='<table style="width:100%;border-collapse:separate;border-spacing:5px;font-size:13px"><tr><th style="padding:10px 14px;text-align:left;color:'+tc+'">District</th>';
+  ms.forEach(m=>{h+='<th style="padding:10px;text-align:center;color:'+tc+'">'+m+'</th>'});
+  h+='</tr>';
+  Object.entries(hd).forEach(([d,v])=>{
+    h+='<tr><td style="padding:10px 14px;font-weight:700;color:#f0f6ff;font-size:13.5px">'+d+'</td>';
+    v.forEach((n,i)=>{
+      const p=(n-.25)/(.85-.25);
+      const r=Math.round(210-p*180),g=Math.round(40+p*190),b=60;
+      const fg=p>.5?'#011b07':'#fff';
+      const feb=i===3;
+      h+=`<td style="padding:10px;text-align:center;background:rgb(${r},${g},${b});color:${fg};border-radius:8px;font-weight:800;font-size:13px;${feb?'outline:2px solid #ffca28;outline-offset:2px;':''}">${n.toFixed(2)}</td>`;
+    });
+    h+='</tr>';
+  });
+  h+='</table>';
+  document.getElementById('heatmap').innerHTML=h;
+})();
+
+// Stress z-score
+new Chart(document.getElementById('st_zscore'),{type:'bar',data:{labels:D,datasets:[{
+  data:[-.2,-.3,-.6,-1.8,-2.4,-3.1],
+  backgroundColor:['#00e676','#00e676','#26c6da','#ffca28','#ff5252','#e53935'],borderRadius:7
+}]},options:{...base,
+  scales:{...base.scales,y:{...base.scales.y,max:0,min:-4,ticks:{...base.scales.y.ticks,callback:v=>'z = '+v}}},
+  plugins:{...base.plugins,tooltip:{...tip,callbacks:{label:ctx=>'Z-Score: '+ctx.raw+(ctx.raw<=-2?' 🚨 CRITICAL':'')}}}
+}});
+
+// Stress impact
+new Chart(document.getElementById('st_impact'),{type:'scatter',data:{datasets:[{
+  data:[{x:-.2,y:1},{x:-.3,y:1.3},{x:-.6,y:2},{x:-1.8,y:22},{x:-2.4,y:29},{x:-3.1,y:36}],
+  backgroundColor:DC,pointRadius:14,pointHoverRadius:18
+}]},options:{...base,
+  scales:{
+    x:{...base.scales.x,min:-3.5,max:0,title:{display:true,text:'Crop stress z-score (more negative = worse)',color:tc,font:{size:12}}},
+    y:{...base.scales.y,min:0,max:45,ticks:{...base.scales.y.ticks,callback:v=>v+'% loss'}}
+  },
+  plugins:{...base.plugins,tooltip:{...tip,callbacks:{label:ctx=>D[ctx.dataIndex]+': z='+ctx.raw.x+' → '+ctx.raw.y+'% yield loss'}}}}});
+
+// Price main
+const mL=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const aP=[2050,2080,2120,2090,2150,2180,2240,2210,2190,2220,2260,2300];
+const fP=[2060,2090,2110,2100,2160,2170,2230,2220,2200,2230,2250,2290];
+new Chart(document.getElementById('pr_main'),{type:'line',data:{labels:mL,datasets:[
+  {label:'Actual price',data:aP,borderColor:'#29b6f6',borderWidth:3,pointRadius:4,tension:.3,backgroundColor:'transparent'},
+  {label:'Our forecast',data:fP,borderColor:'#00e676',borderWidth:3,borderDash:[6,3],pointRadius:3,tension:.3,backgroundColor:'transparent'},
+  {label:'Upper (80% CI)',data:fP.map(v=>Math.round(v*1.08)),borderColor:'transparent',backgroundColor:'rgba(255,202,40,.1)',fill:'+1',pointRadius:0},
+  {label:'Lower (80% CI)',data:fP.map(v=>Math.round(v*0.92)),borderColor:'transparent',backgroundColor:'transparent',fill:false,pointRadius:0},
+  {label:'MSP floor ₹2,015',data:Array(12).fill(2015),borderColor:'#ff5252',borderWidth:2,borderDash:[3,3],pointRadius:0,backgroundColor:'transparent'}
+]},options:{...base,
+  scales:{...base.scales,y:{...base.scales.y,min:1900,ticks:{...base.scales.y.ticks,callback:v=>'₹'+v}}},
+  plugins:{...base.plugins,legend:{display:true,labels:{boxWidth:12,font:{size:11.5},color:tc,padding:14}}}}});
+
+// Price comparison
+new Chart(document.getElementById('pr_comp'),{type:'bar',data:{
+  labels:['Wheat','Onion','Tomato'],
+  datasets:[
+    {label:'SARIMA (stats)',data:[12.4,18.9,24.1],backgroundColor:'#37474f',borderRadius:5},
+    {label:'LightGBM (AI)',data:[10.8,16.2,20.3],backgroundColor:'#29b6f6',borderRadius:5},
+    {label:'Combined (best)',data:[9.1,14.8,18.2],backgroundColor:'#00e676',borderRadius:5}
+  ]
+},options:{...base,scales:{...base.scales,y:{...base.scales.y,ticks:{...base.scales.y.ticks,callback:v=>v+'%'}}},
+  plugins:{...base.plugins,legend:{display:true,labels:{boxWidth:10,font:{size:11},color:tc,padding:12}}}}});
+
+// Price seasonal
+new Chart(document.getElementById('pr_season'),{type:'line',data:{labels:mL,datasets:[{
+  data:[2050,2080,2120,2180,2260,2200,2150,2100,2130,2180,2240,2290],
+  borderColor:'#00e676',backgroundColor:'rgba(0,230,118,.08)',fill:true,tension:.4,pointRadius:5,borderWidth:3
+}]},options:{...base,scales:{...base.scales,y:{...base.scales.y,min:1900,ticks:{...base.scales.y.ticks,callback:v=>'₹'+v}}}}});
+
+// Price features
+new Chart(document.getElementById('pr_feat'),{type:'bar',data:{
+  labels:['Last week price','Monsoon data','Market arrivals','Govt MSP','Diesel cost','Futures market'],
+  datasets:[{data:[32,20,18,14,9,7],backgroundColor:['#00e676','#29b6f6','#26c6da','#ff5252','#ffca28','#ce93d8'],borderRadius:5}]
+},options:{...base,indexAxis:'y',scales:{...base.scales,x:{...base.scales.x,ticks:{...base.scales.x.ticks,callback:v=>v+'%'}}}}});
+
+// Credit donut
+new Chart(document.getElementById('cr_donut'),{type:'doughnut',data:{
+  labels:['Normal — 3 districts (50%)','Moderate — 1 district (17%)','High Risk — 2 districts (33%)'],
+  datasets:[{data:[50,17,33],backgroundColor:['#00e676','#ffca28','#ff5252'],borderWidth:0,hoverOffset:12}]
+},options:{responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:14,font:{size:13},color:tc,padding:18}},tooltip:tip,cutout:'62%'}}});
+</script>
+</body>
+</html>

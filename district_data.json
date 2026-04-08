@@ -1,0 +1,749 @@
+{
+  "meta": {
+    "season": "Rabi 2022-23",
+    "crop": "Wheat",
+    "generated_at": "2026-04-07T16:33:15.168145Z",
+    "districts_n": 12
+  },
+  "kpis": {
+    "yield_mape_pct": 1.7,
+    "districts_covered": 12,
+    "critical_districts": 3,
+    "warning_lead_weeks": 6,
+    "pixels_processed_m": 660,
+    "pipeline_latency_hrs": 8
+  },
+  "districts": [
+    {
+      "name": "Ludhiana",
+      "lat": 30.901,
+      "lon": 75.8573,
+      "area_ha": 156000,
+      "ndvi_series": {
+        "months": [
+          "Nov",
+          "Dec",
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr"
+        ],
+        "ndvi": [
+          0.327,
+          0.551,
+          0.742,
+          0.777,
+          0.74,
+          0.401
+        ],
+        "peak_ndvi": 0.777
+      },
+      "ndvi_feb": 0.777,
+      "zscore": 0.24,
+      "stress": {
+        "tier": "Normal",
+        "color": "#3B6D11",
+        "action": "Standard KCC limit"
+      },
+      "yield": {
+        "predicted_kg_ha": 5313,
+        "actual_kg_ha": 5412,
+        "mape_pct": 1.8,
+        "ci_lower": 4888,
+        "ci_upper": 5738,
+        "yield_deviation_pct": 10.7
+      },
+      "rainfall_mm": 130.8,
+      "gdd": 1549.4
+    },
+    {
+      "name": "Patiala",
+      "lat": 30.3398,
+      "lon": 76.3869,
+      "area_ha": 148000,
+      "ndvi_series": {
+        "months": [
+          "Nov",
+          "Dec",
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr"
+        ],
+        "ndvi": [
+          0.315,
+          0.509,
+          0.695,
+          0.738,
+          0.76,
+          0.408
+        ],
+        "peak_ndvi": 0.76
+      },
+      "ndvi_feb": 0.738,
+      "zscore": -0.31,
+      "stress": {
+        "tier": "Normal",
+        "color": "#3B6D11",
+        "action": "Standard KCC limit"
+      },
+      "yield": {
+        "predicted_kg_ha": 5146,
+        "actual_kg_ha": 5014,
+        "mape_pct": 2.6,
+        "ci_lower": 4735,
+        "ci_upper": 5558,
+        "yield_deviation_pct": 7.2
+      },
+      "rainfall_mm": 118.5,
+      "gdd": 1419.1
+    },
+    {
+      "name": "Amritsar",
+      "lat": 31.634,
+      "lon": 74.8723,
+      "area_ha": 131000,
+      "ndvi_series": {
+        "months": [
+          "Nov",
+          "Dec",
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr"
+        ],
+        "ndvi": [
+          0.339,
+          0.509,
+          0.736,
+          0.787,
+          0.757,
+          0.374
+        ],
+        "peak_ndvi": 0.787
+      },
+      "ndvi_feb": 0.787,
+      "zscore": 0.39,
+      "stress": {
+        "tier": "Normal",
+        "color": "#3B6D11",
+        "action": "Standard KCC limit"
+      },
+      "yield": {
+        "predicted_kg_ha": 5473,
+        "actual_kg_ha": 5392,
+        "mape_pct": 1.5,
+        "ci_lower": 5035,
+        "ci_upper": 5911,
+        "yield_deviation_pct": 14.0
+      },
+      "rainfall_mm": 162.7,
+      "gdd": 1601.3
+    },
+    {
+      "name": "Mansa",
+      "lat": 29.9863,
+      "lon": 75.3915,
+      "area_ha": 119000,
+      "ndvi_series": {
+        "months": [
+          "Nov",
+          "Dec",
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr"
+        ],
+        "ndvi": [
+          0.199,
+          0.318,
+          0.433,
+          0.497,
+          0.463,
+          0.244
+        ],
+        "peak_ndvi": 0.497
+      },
+      "ndvi_feb": 0.497,
+      "zscore": -3.76,
+      "stress": {
+        "tier": "Severe",
+        "color": "#A32D2D",
+        "action": "Pre-position collections Apr 15"
+      },
+      "yield": {
+        "predicted_kg_ha": 1800,
+        "actual_kg_ha": 1819,
+        "mape_pct": 1.1,
+        "ci_lower": 1656,
+        "ci_upper": 1944,
+        "yield_deviation_pct": -62.5
+      },
+      "rainfall_mm": 122.7,
+      "gdd": 1534.3
+    },
+    {
+      "name": "Faridkot",
+      "lat": 30.6645,
+      "lon": 74.7577,
+      "area_ha": 108000,
+      "ndvi_series": {
+        "months": [
+          "Nov",
+          "Dec",
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr"
+        ],
+        "ndvi": [
+          0.194,
+          0.339,
+          0.451,
+          0.427,
+          0.457,
+          0.236
+        ],
+        "peak_ndvi": 0.457
+      },
+      "ndvi_feb": 0.427,
+      "zscore": -4.76,
+      "stress": {
+        "tier": "Severe",
+        "color": "#A32D2D",
+        "action": "Pre-position collections Apr 15"
+      },
+      "yield": {
+        "predicted_kg_ha": 1800,
+        "actual_kg_ha": 1768,
+        "mape_pct": 1.8,
+        "ci_lower": 1656,
+        "ci_upper": 1944,
+        "yield_deviation_pct": -62.5
+      },
+      "rainfall_mm": 145.3,
+      "gdd": 1527.1
+    },
+    {
+      "name": "Bathinda",
+      "lat": 30.211,
+      "lon": 74.9455,
+      "area_ha": 143000,
+      "ndvi_series": {
+        "months": [
+          "Nov",
+          "Dec",
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr"
+        ],
+        "ndvi": [
+          0.189,
+          0.349,
+          0.428,
+          0.499,
+          0.43,
+          0.215
+        ],
+        "peak_ndvi": 0.499
+      },
+      "ndvi_feb": 0.499,
+      "zscore": -3.73,
+      "stress": {
+        "tier": "Severe",
+        "color": "#A32D2D",
+        "action": "Pre-position collections Apr 15"
+      },
+      "yield": {
+        "predicted_kg_ha": 1800,
+        "actual_kg_ha": 1753,
+        "mape_pct": 2.7,
+        "ci_lower": 1656,
+        "ci_upper": 1944,
+        "yield_deviation_pct": -62.5
+      },
+      "rainfall_mm": 128.0,
+      "gdd": 1744.2
+    },
+    {
+      "name": "Sangrur",
+      "lat": 30.2455,
+      "lon": 75.8441,
+      "area_ha": 127000,
+      "ndvi_series": {
+        "months": [
+          "Nov",
+          "Dec",
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr"
+        ],
+        "ndvi": [
+          0.315,
+          0.508,
+          0.723,
+          0.741,
+          0.72,
+          0.407
+        ],
+        "peak_ndvi": 0.741
+      },
+      "ndvi_feb": 0.741,
+      "zscore": -0.27,
+      "stress": {
+        "tier": "Normal",
+        "color": "#3B6D11",
+        "action": "Standard KCC limit"
+      },
+      "yield": {
+        "predicted_kg_ha": 5035,
+        "actual_kg_ha": 5070,
+        "mape_pct": 0.7,
+        "ci_lower": 4632,
+        "ci_upper": 5438,
+        "yield_deviation_pct": 4.9
+      },
+      "rainfall_mm": 134.8,
+      "gdd": 1790.2
+    },
+    {
+      "name": "Firozpur",
+      "lat": 30.9254,
+      "lon": 74.6136,
+      "area_ha": 134000,
+      "ndvi_series": {
+        "months": [
+          "Nov",
+          "Dec",
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr"
+        ],
+        "ndvi": [
+          0.326,
+          0.539,
+          0.73,
+          0.736,
+          0.758,
+          0.394
+        ],
+        "peak_ndvi": 0.758
+      },
+      "ndvi_feb": 0.736,
+      "zscore": -0.34,
+      "stress": {
+        "tier": "Normal",
+        "color": "#3B6D11",
+        "action": "Standard KCC limit"
+      },
+      "yield": {
+        "predicted_kg_ha": 5167,
+        "actual_kg_ha": 5284,
+        "mape_pct": 2.2,
+        "ci_lower": 4754,
+        "ci_upper": 5580,
+        "yield_deviation_pct": 7.6
+      },
+      "rainfall_mm": 133.1,
+      "gdd": 1556.4
+    },
+    {
+      "name": "Hoshiarpur",
+      "lat": 31.5143,
+      "lon": 75.9115,
+      "area_ha": 89000,
+      "ndvi_series": {
+        "months": [
+          "Nov",
+          "Dec",
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr"
+        ],
+        "ndvi": [
+          0.347,
+          0.552,
+          0.727,
+          0.748,
+          0.751,
+          0.391
+        ],
+        "peak_ndvi": 0.751
+      },
+      "ndvi_feb": 0.748,
+      "zscore": -0.17,
+      "stress": {
+        "tier": "Normal",
+        "color": "#3B6D11",
+        "action": "Standard KCC limit"
+      },
+      "yield": {
+        "predicted_kg_ha": 5062,
+        "actual_kg_ha": 4992,
+        "mape_pct": 1.4,
+        "ci_lower": 4657,
+        "ci_upper": 5467,
+        "yield_deviation_pct": 5.5
+      },
+      "rainfall_mm": 113.7,
+      "gdd": 1519.4
+    },
+    {
+      "name": "Jalandhar",
+      "lat": 31.326,
+      "lon": 75.5762,
+      "area_ha": 112000,
+      "ndvi_series": {
+        "months": [
+          "Nov",
+          "Dec",
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr"
+        ],
+        "ndvi": [
+          0.295,
+          0.528,
+          0.713,
+          0.789,
+          0.711,
+          0.384
+        ],
+        "peak_ndvi": 0.789
+      },
+      "ndvi_feb": 0.789,
+      "zscore": 0.41,
+      "stress": {
+        "tier": "Normal",
+        "color": "#3B6D11",
+        "action": "Standard KCC limit"
+      },
+      "yield": {
+        "predicted_kg_ha": 5427,
+        "actual_kg_ha": 5531,
+        "mape_pct": 1.9,
+        "ci_lower": 4993,
+        "ci_upper": 5861,
+        "yield_deviation_pct": 13.1
+      },
+      "rainfall_mm": 138.0,
+      "gdd": 1590.0
+    },
+    {
+      "name": "Kapurthala",
+      "lat": 31.3782,
+      "lon": 75.3838,
+      "area_ha": 78000,
+      "ndvi_series": {
+        "months": [
+          "Nov",
+          "Dec",
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr"
+        ],
+        "ndvi": [
+          0.318,
+          0.549,
+          0.701,
+          0.768,
+          0.745,
+          0.39
+        ],
+        "peak_ndvi": 0.768
+      },
+      "ndvi_feb": 0.768,
+      "zscore": 0.11,
+      "stress": {
+        "tier": "Normal",
+        "color": "#3B6D11",
+        "action": "Standard KCC limit"
+      },
+      "yield": {
+        "predicted_kg_ha": 5234,
+        "actual_kg_ha": 5366,
+        "mape_pct": 2.5,
+        "ci_lower": 4815,
+        "ci_upper": 5652,
+        "yield_deviation_pct": 9.0
+      },
+      "rainfall_mm": 127.9,
+      "gdd": 1720.2
+    },
+    {
+      "name": "Gurdaspur",
+      "lat": 32.042,
+      "lon": 75.4051,
+      "area_ha": 93000,
+      "ndvi_series": {
+        "months": [
+          "Nov",
+          "Dec",
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr"
+        ],
+        "ndvi": [
+          0.319,
+          0.524,
+          0.717,
+          0.735,
+          0.727,
+          0.388
+        ],
+        "peak_ndvi": 0.735
+      },
+      "ndvi_feb": 0.735,
+      "zscore": -0.36,
+      "stress": {
+        "tier": "Normal",
+        "color": "#3B6D11",
+        "action": "Standard KCC limit"
+      },
+      "yield": {
+        "predicted_kg_ha": 5081,
+        "actual_kg_ha": 5074,
+        "mape_pct": 0.1,
+        "ci_lower": 4674,
+        "ci_upper": 5487,
+        "yield_deviation_pct": 5.8
+      },
+      "rainfall_mm": 172.3,
+      "gdd": 1456.5
+    }
+  ],
+  "price_forecasts": {
+    "wheat": {
+      "commodity": "Wheat",
+      "mape_pct": 9.1,
+      "msp_floor": 2015,
+      "months": [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
+      ],
+      "actual": [
+        2175,
+        2192,
+        2250,
+        2194,
+        2217,
+        2316,
+        2333,
+        2208,
+        2286,
+        2252,
+        2282,
+        2411
+      ],
+      "forecast": [
+        2162,
+        2191,
+        2264,
+        2185,
+        2198,
+        2334,
+        2318,
+        2181,
+        2298,
+        2261,
+        2300,
+        2435
+      ],
+      "ci_upper": [
+        2335,
+        2366,
+        2445,
+        2360,
+        2374,
+        2521,
+        2503,
+        2355,
+        2482,
+        2442,
+        2484,
+        2630
+      ],
+      "ci_lower": [
+        1989,
+        2016,
+        2083,
+        2010,
+        2022,
+        2147,
+        2133,
+        2007,
+        2114,
+        2080,
+        2116,
+        2240
+      ]
+    },
+    "onion": {
+      "commodity": "Onion",
+      "mape_pct": 14.8,
+      "msp_floor": null,
+      "months": [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
+      ],
+      "actual": [
+        1421,
+        1532,
+        1560,
+        1560,
+        1433,
+        1504,
+        1571,
+        1529,
+        1563,
+        1570,
+        1635,
+        1537
+      ],
+      "forecast": [
+        1426,
+        1545,
+        1573,
+        1540,
+        1423,
+        1487,
+        1580,
+        1533,
+        1583,
+        1579,
+        1614,
+        1514
+      ],
+      "ci_upper": [
+        1540,
+        1669,
+        1699,
+        1663,
+        1537,
+        1606,
+        1706,
+        1656,
+        1710,
+        1705,
+        1743,
+        1635
+      ],
+      "ci_lower": [
+        1312,
+        1421,
+        1447,
+        1417,
+        1309,
+        1368,
+        1454,
+        1410,
+        1456,
+        1453,
+        1485,
+        1393
+      ]
+    },
+    "tomato": {
+      "commodity": "Tomato",
+      "mape_pct": 18.2,
+      "msp_floor": null,
+      "months": [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
+      ],
+      "actual": [
+        1005,
+        1007,
+        1062,
+        973,
+        1056,
+        1057,
+        1140,
+        1139,
+        1152,
+        1073,
+        1179,
+        1154
+      ],
+      "forecast": [
+        1020,
+        1035,
+        1061,
+        943,
+        1077,
+        1032,
+        1145,
+        1124,
+        1167,
+        1072,
+        1189,
+        1145
+      ],
+      "ci_upper": [
+        1102,
+        1118,
+        1146,
+        1018,
+        1163,
+        1115,
+        1237,
+        1214,
+        1260,
+        1158,
+        1284,
+        1237
+      ],
+      "ci_lower": [
+        938,
+        952,
+        976,
+        868,
+        991,
+        949,
+        1053,
+        1034,
+        1074,
+        986,
+        1094,
+        1053
+      ]
+    }
+  }
+}
